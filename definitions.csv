@@ -1,0 +1,7 @@
+temp,Temperature,ºC,ºF
+temp_min,Min,ºC,ºF
+temp_max,Max,ºC,ºF
+feels_like,Feels Like,ºC,ºF
+humidity,Humidity,%,%
+speed,Wind Speed,km/h,kn
+rain, Precipitation,mm,in

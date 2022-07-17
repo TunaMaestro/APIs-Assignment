@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <p>hii</p>
+            <div id="chart"></div>
+        </div>
+
+    <script type="text/javascript">
+        let graphs = {{ graph | safe }};
+        Plotly.plot('chart', graphs, {});
+    </script>
+
+    </div>
+
+
+
+{% endblock %}
