@@ -1,4 +1,3 @@
-import pandas
 import requests
 import datetime
 import humanize
@@ -6,6 +5,8 @@ import pandas as pd
 import numpy as np
 import profile
 import _pickle as pickle
+
+dataLoc = "dynamic/transport/"
 
 def generate_end_urls():
     urls = []
@@ -26,7 +27,7 @@ def generate_end_urls():
 
 
 def request_files(urls, dates, force_new=False):
-    with open('rawData.txt') as f:
+    with open(f'{dataLoc}rawData.txt') as f:
         first_line = f.readline()
         f.seek(0)
         old_text = f.read()
@@ -37,7 +38,7 @@ def request_files(urls, dates, force_new=False):
             if not force_new:
                 return True
 
-    with open('rawData.txt', 'w') as f:
+    with open(f'{dataLoc}rawData.txt', 'w') as f:
         f.write(f'Last-Updated: {datetime.date.today().isoformat()}\n')
         for i, url in enumerate(urls):
             response = requests.get(url, headers={'Referer': 'https://opendata.transport.nsw.gov.au/'})
@@ -65,7 +66,7 @@ def request_files(urls, dates, force_new=False):
 
 def process_data():
     all = pd.DataFrame()
-    with open('rawData copy 3.txt') as f:
+    with open(f'{dataLoc}rawData.txt') as f:
         first_line = f.readline()
         if "Last-Updated" not in first_line:
             print(f'Attempted reading empty file: {f}')
@@ -102,39 +103,48 @@ def process_data():
             line_data[line[2]] = dayTapSum
             oldline = line
 
-    bus = dataSeriesByTransport['Bus']
-    data = {key: pd.DataFrame(data=val.values(), index=val.keys(), dtype=pd.Int64Dtype()) for key, val in dataSeriesByTransport.items()}
+    data = {key: pd.DataFrame(data=val.values(), index=val.keys(), dtype=pd.Int64Dtype()) for key, val in
+            dataSeriesByTransport.items()}
     return pd.concat(data, axis=1)
 
+
 def write_data(data):
-    with open('transport.pkl', 'wb') as output:
+    with open(f'{dataLoc}transport.pkl', 'wb') as output:
         pickle.dump(data, output, -1)
 
+
 def read_data():
-    with open('transport.pkl', 'rb') as inp:
+    with open(f'{dataLoc}transport.pkl', 'rb') as inp:
         return pickle.load(inp)
 
+
 def all_transport_sum(data):
-
     sums = data.xs('All - NSW', axis=1, level=1).sum(axis=1)
+    return sums
 
+def aggregate(data, aggregatePeriod=7):
     aggregatePeriod = 7
+
     def match_time_period(dt):
         return dt.timestamp() // datetime.timedelta(days=aggregatePeriod).total_seconds()
 
-    grouped = sums.groupby(by=match_time_period, group_keys=False)
+    grouped = data.groupby(by=match_time_period, group_keys=False)
 
-    sums = grouped.agg(np.mean)
+    data = grouped.agg(np.mean)
 
-    newIndex = [datetime.datetime.fromtimestamp(x * datetime.timedelta(days=aggregatePeriod).total_seconds()) for x in sums.index]
-    sums.index = pandas.DatetimeIndex(newIndex)
-    return sums
+    newIndex = [datetime.datetime.fromtimestamp(x * datetime.timedelta(days=aggregatePeriod).total_seconds()) for x in
+                data.index]
+    data.index = pd.DatetimeIndex(newIndex)
+    return data
+
 
 if __name__ == '__main__':
     # urls, dates = generate_end_urls()
     # request_files(urls, dates)
     # data = process_data()
     # profile.run("process_data()")
+    request_files(*generate_end_urls())
     write_data(process_data())
+    data = read_data()
 
     pass

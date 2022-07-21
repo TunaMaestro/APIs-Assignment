@@ -8,7 +8,6 @@ import pandas as pd
 import weather_api
 
 
-
 def graph(leftFrame, leftCols, rightFrame, rightCols, definitions):
     """
     :param frame: pd.DataFrame
@@ -22,14 +21,20 @@ def graph(leftFrame, leftCols, rightFrame, rightCols, definitions):
 
     labels = {key: definitions[key]['label'] for key in definitions}
 
-    for i, col in enumerate(rightCols):
-        colours = px.colors.qualitative.Plotly
-        fig.add_trace(
-            go.Scatter(x=rightFrame.index, y=rightFrame[col], mode='lines', line=dict(color=colours[i]),
-                       name=labels[col],
-                       yaxis=f'y{"" if i == 0 else i + 1}'
-                       )
-        )
+    colours = px.colors.qualitative.Plotly
+    parts = [
+        go.Bar(x=rightFrame.index, y=rightFrame['rain'], base=dict(color=colours[0]),
+                   name=labels['rain'],
+                   yaxis=f'y'
+                   ),
+
+        go.Scatter(x=rightFrame.index, y=rightFrame['temp'], mode='lines', line=dict(color=colours[1]),
+                   name=labels['temp'],
+                   yaxis=f'y2'
+                   )
+    ]
+    fig.add_traces(parts)
+    for i, col in enumerate(['rain', 'temp']):
         fig.update_layout({
             f"yaxis{str() if i == 0 else i + 1}": {
                 "title": labels[col],
@@ -99,9 +104,9 @@ def graph(leftFrame, leftCols, rightFrame, rightCols, definitions):
     # fig2 = px.line(leftFrame)
     # fig2.show()
 
-
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    fig.show()
+    if __name__ == '__main__':
+        fig.show()
     return graphJSON
 
 
@@ -131,7 +136,9 @@ if __name__ == '__main__':
     transport = gather_transport_data.read_data()
     bus = transport['Bus']
     sumTransport = gather_transport_data.all_transport_sum(transport)
-    graph(leftFrame=sumTransport, leftCols=[], rightFrame=weather_api.historical_sydney(), rightCols=['rain', 'temp'], definitions=definitions)
+    graph(leftFrame=sumTransport, leftCols=[], rightFrame=weather_api.historical_sydney(), rightCols=['rain', 'temp'],
+          definitions=definitions)
+
 
 def doThing():
     definitions = {}
@@ -145,5 +152,5 @@ def doThing():
     transport = gather_transport_data.process_data()
     bus = transport['Bus']
     sumTransport = gather_transport_data.all_transport_sum(transport)
-    graph(leftFrame=sumTransport, leftCols=[], rightFrame=weather_api.historical_sydney(), rightCols=['rain', 'temp'], definitions=definitions)
-
+    graph(leftFrame=sumTransport, leftCols=[], rightFrame=weather_api.historical_sydney(), rightCols=['rain', 'temp'],
+          definitions=definitions)

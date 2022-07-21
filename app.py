@@ -1,8 +1,8 @@
-from flask import Flask, render_template, request
-import weather_api, graphing
-import pprint
-import datetime
-import pandas as pd
+from flask import Flask, render_template
+
+import gather_transport_data as td
+import graphing
+import weather_api
 
 app = Flask(__name__)
 
@@ -20,7 +20,12 @@ with open('definitions.csv') as f:
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    figJSON = graphing.graph(weather_api.historical_sydney(), ['rain', 'temp'], definitions)
+    transport = td.read_data()
+
+    sumTransport = td.all_transport_sum(transport)
+    sumTransport = td.aggregate(sumTransport, 7)
+    figJSON = graphing.graph(leftFrame=sumTransport, leftCols=[], rightFrame=weather_api.historical_sydney(), rightCols=['rain', 'temp'],
+                                 definitions=definitions)
 
     return render_template('index.html', graphJSON=figJSON)
 

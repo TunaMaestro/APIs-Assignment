@@ -11,6 +11,7 @@ import math
 
 pd.options.plotting.backend = "plotly"
 
+dataLoc = "dynamic/weather/"
 
 def call_api(path, query, endpoint=f'https://api.openweathermap.org'):
     url = f'{endpoint}{path}{query}'
@@ -30,14 +31,13 @@ def weather_from_coords(lat, lon):
     return call_api(path, query, endpoint="https://history.openweathermap.org")
 
 
-def historical_one_year(city):
+def historical_one_year(city, downloadNew=False):
     list = []
-    with open('staticWeatherFrom2020.json') as f:
+    with open(f'{dataLoc}staticWeatherFrom2020.json') as f:
         keysToKeep = ['dt', 'main', 'weather', 'clouds', 'wind']
         for i in json.load(f):
             list.append({key: val for key, val in i.items() if key in keysToKeep})
 
-    downloadNew = False
     if downloadNew:
         key = os.environ['WEATHER_HISTORY_KEY']
         units = 'metric'
@@ -66,12 +66,6 @@ def city_data(city, country='AU'):
     query = f'?q={city}&limit=1&appid={key}'
     # print(path, query)
     return call_api(path, query)
-
-
-def weather_from_city(city, func):
-    # if not (cityData := city_data(city)):
-    #     return False
-    return func(city)
 
 
 # def temperature(data):
@@ -110,11 +104,6 @@ def process_data(data=None):
     newIndex = [datetime.datetime.fromtimestamp(x * datetime.timedelta(days=aggregatePeriod).total_seconds()) for x in final.index]
     final.index = newIndex
 
-    # final = final.groupby([total_weeks(x) for x in final.index]).mean()
-    # print('final dt_text:', final['dt_txt'])
-    # TODO: aggregate by day using DF.groupby, possibly df.groupby(df.index.date).sum()
-    # see https://stackoverflow.com/questions/46444444/how-to-calculate-sum-of-column-per-day-in-pandas
-    #
     return final
 
 
@@ -130,6 +119,6 @@ def historical_sydney():
 if __name__ == '__main__':
     # weather_from_city('Sydney', weather_from_coords)
     # data = process_data()
-    rawList = weather_from_city('Sydney', historical_one_year)
-    data = process_data(rawList)
+    rawList = historical_one_year('sydney', downloadNew=True)
+    # data = process_data(rawList)
     pass

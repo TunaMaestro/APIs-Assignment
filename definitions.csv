@@ -4,4 +4,4 @@ temp_max,Max,ºC,ºF
 feels_like,Feels Like,ºC,ºF
 humidity,Humidity,%,%
 speed,Wind Speed,km/h,kn
-rain, Precipitation,mm,in
+rain,Precipitation,mm,in
