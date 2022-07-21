@@ -126,7 +126,7 @@ def graph(leftFrame, leftCols, rightFrame, rightCols, definitions):
 
 if __name__ == '__main__':
     definitions = {}
-    with open('definitions.csv') as f:
+    with open('static/definitions.csv') as f:
         for line in f:
             id, label, metric, imperial = line.strip().split(',')
             definitions[id] = {
@@ -136,13 +136,14 @@ if __name__ == '__main__':
     transport = gather_transport_data.read_data()
     bus = transport['Bus']
     sumTransport = gather_transport_data.all_transport_sum(transport)
+    sumTransport = gather_transport_data.aggregate_over_time(sumTransport)
     graph(leftFrame=sumTransport, leftCols=[], rightFrame=weather_api.historical_sydney(), rightCols=['rain', 'temp'],
           definitions=definitions)
 
 
 def doThing():
     definitions = {}
-    with open('definitions.csv') as f:
+    with open('static/definitions.csv') as f:
         for line in f:
             id, label, metric, imperial = line.strip().split(',')
             definitions[id] = {

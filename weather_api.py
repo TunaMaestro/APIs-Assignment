@@ -52,9 +52,9 @@ def historical_one_year(city, downloadNew=False):
             list.extend(response['list'])
             print(start.isoformat())
             start += datetime.timedelta(weeks=1)
-        with open('rawPastYear.txt', 'w') as f:
+        with open('learning files/rawPastYear.txt', 'w') as f:
             json.dump(list, f)
-    with open('rawPastYear.txt') as f:
+    with open('learning files/rawPastYear.txt') as f:
         list.extend(json.load(f))
     return list
 
@@ -78,7 +78,7 @@ def city_data(city, country='AU'):
 def process_data(data=None):
     pd.set_option('display.max_columns', 4)
     if data is None:
-        with open('testData.json') as f:
+        with open('learning files/testData.json') as f:
             data = json.load(f)['list']
 
     for i, val in enumerate(data):
@@ -112,7 +112,7 @@ def historical_sydney():
     """
     :return: pd.DataFrame
     """
-    rawList = weather_from_city('Sydney', historical_one_year)
+    rawList = historical_one_year('Sydney')
     return process_data(rawList)
 
 

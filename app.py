@@ -9,7 +9,7 @@ app = Flask(__name__)
 x = 5
 
 definitions = {}
-with open('definitions.csv') as f:
+with open('static/definitions.csv') as f:
     for line in f:
         id, label, metric, imperial = line.strip().split(',')
         definitions[id] = {
@@ -46,4 +46,4 @@ def graphs():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5001)

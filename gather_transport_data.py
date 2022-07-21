@@ -1,3 +1,4 @@
+import pandas
 import requests
 import datetime
 import humanize
@@ -6,7 +7,7 @@ import numpy as np
 import profile
 import _pickle as pickle
 
-dataLoc = "dynamic/transport/"
+dataLoc = "./dynamic/transport/"
 
 def generate_end_urls():
     urls = []
@@ -99,7 +100,7 @@ def process_data():
 
                 print('\r', i, end='')
 
-            dayTapSum = sum(25 if '<' in x else int(x) for x in line[4:6])
+            dayTapSum = sum(25 if '<' in x else int(x) for x in line[4:6]) / 2
             line_data[line[2]] = dayTapSum
             oldline = line
 
@@ -114,8 +115,14 @@ def write_data(data):
 
 
 def read_data():
-    with open(f'{dataLoc}transport.pkl', 'rb') as inp:
-        return pickle.load(inp)
+    try:
+        with open(f'{dataLoc}transport.pkl', 'rb') as inp:
+            return pickle.load(inp)
+    except FileNotFoundError:
+        print('No preloaded file, creating new...')
+        data = process_data()
+        write_data(data)
+        return data
 
 
 def all_transport_sum(data):
