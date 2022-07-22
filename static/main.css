@@ -1,0 +1,88 @@
+.filter-icon {
+    fill: white;
+    margin: 2px;
+}
+
+#sidebar {
+    overflow: hidden;
+}
+
+#content {
+    overflow-y: auto;
+}
+
+main {
+    display: flex;
+    flex-wrap: nowrap;
+    height: 100vh;
+    height: -webkit-fill-available;
+    max-height: 100vh;
+    overflow: hidden;
+}
+.topbar h1 {
+    margin: 0;
+    padding: 1%;
+    text-align: center;
+}
+.topbar {
+    border-bottom-width: 2px;
+    border-bottom-color: #f8f9fa;
+    border-bottom-style: solid;
+
+}
+
+
+.main-graph {
+    min-width: 100%;
+    margin: auto;
+}
+
+.content {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+}
+
+
+.sidebar {
+    position: relative;
+    top: 0;
+    overflow: hidden;
+    /*this kills the <hr> tags on the sidebar*/
+}
+
+hr {
+    width: 97%;
+}
+
+.thick-hr {
+    height: 2px !important;
+    opacity: 70%;
+}
+
+.extra-info {
+    display: none;
+    line-height: 20px;
+    font-size: 12px;
+    color: black;
+}
+
+.info:hover .extra-info {
+    display: inline-block;
+}
+
+.info {
+    font-size: 20px;
+    padding-left: 5px;
+    width: 20px;
+    border-radius: 15px;
+}
+
+.info:hover {
+    background-color: white;
+    padding: 0 0 0 5px;
+    width: 315px;
+    text-align: left !important;
+    color: black;
+}
+

@@ -1,67 +1,111 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
-        <div class="container">
-    <div class="p-5 mb-4 bg-light rounded-3">
-      <div class="container-fluid py-5">
-        <h1 class="display-5 fw-bold">Weather and Transport</h1>
-        <button class="btn btn-primary btn-lg" type="button">Example button</button>
-      </div>
-    </div>
-
-    <div class="container">
-
-
-        <h2>Dashboard</h2>
-        <div class="row">
-            <div id="chart"></div>
-        </div>
+    <div class="topbar bg-dark text-white">
+        <h1>Weather and Transport</h1>
 
     </div>
-    {% if error is defined %}
-        <div class="alert alert-warning">
-            No data for city
+    <main>
+        <!-- Sidebar, from https://getbootstrap.com/docs/5.0/examples/sidebars/# -->
+        <div id="sidebar" class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white bg-dark"
+             style="width: 280px; height: 100%;">
+            <form id="filter">
+                <a href="/" id="filter-submit"
+                   class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+                    <svg class="filter-icon" width="26" height="18" viewBox="0 0 26 18"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path d="M26 4.9H0V3l26-.1zM26 14.9H0V13l26-.1z"></path>
+                        <circle cx="8.1" cy="3.9" r="3.5"></circle>
+                        <circle cx="17.5" cy="13.9" r="3.5"></circle>
+                    </svg>
+                    <span class="fs-4">Filters</span>
+                </a>
+                <hr class="thick-hr">
+                <h5 class="fs-5">Transport</h5>
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item active">
+                        <a href="#" class="filter-setting nav-link text-white active" id="filter-all">
+                            <img class="bi me-2" width="20" height="20"
+                                 src="{{ url_for('static', filename="images/all.svg") }}">
+                            All
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="filter-setting nav-link text-white" id="filter-bus">
+                            <img class="bi me-2" width="20" height="20" src="https://anytrip.com.au/img/tfnsw/bus.svg">
+                            Bus
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="filter-setting nav-link text-white" id="filter-train">
+                            <img class="bi me-2" width="20" height="20"
+                                 src="https://anytrip.com.au/img/tfnsw/train.svg">
+                            Trains & Metro
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="filter-setting nav-link text-white" id="filter-ferry">
+                            <img class="bi me-2" width="20" height="20"
+                                 src="https://anytrip.com.au/img/tfnsw/ferry.svg">
+                            Ferry
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="filter-setting nav-link text-white" id="filter-lightrail">
+                            <img class="bi me-2" width="20" height="20"
+                                 src="https://anytrip.com.au/img/tfnsw/lightrail.svg">
+                            Light Rail
+                        </a>
+                    </li>
+                </ul>
+                <hr>
+                <label>Region<br>
+                    <select name="loc">
+                        {% for loc in locations %}
+                            <option>{{ loc }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <hr>
+
+                <label>Aggregated
+                    <input type="radio" name="agg" value="aggregated">
+                </label>
+                <label>Separate
+                    <input type="radio" name="agg" value="separate">
+                </label>
+                <!-- info from https://codepen.io/EasyBoarder/pen/LZzzjy -->
+                <div class="col-md-12">
+                    <div class="info">
+                        <i class="icon-info-sign"></i>
+                        <span class="extra-info">Aggregated traces or separate</span>
+                    </div>
+                </div>
+
+                <hr class="thick-hr">
+                <h5 class="fs-5">Weather</h5>
+                {% for weatherAspect in definitions %}
+                    <label>{{ definitions[weatherAspect]['label'] }}
+                        <input name="{{ weatherAspect }}" type="checkbox">
+                    </label>
+                {% endfor %}
+            </form>
         </div>
-    {% endif %}
-    {% if data is defined %}
-        <h2>Current Area Information</h2>
-        <table>
-            {% for id in definitions %}
-                <tr>
-                    <th>{{ definitions[id]['label'] }}</th>
-                    <td>{{ data[id] }}</td>
-                </tr>
-            {% endfor %}
+
+        <div id="content" class="content d-flex flex-column flex-shrink-0 p-3 bg-light">
+
+            <div class="main-graph bg-light" id="main-graph"></div>
+
+            <p id="df">wwehwewew</p>
+        </div>
+    </main>
+
+    <script type="text/javascript">
+        let graphs = {{ graphJSON | safe }};
+        Plotly.plot('main-graph', graphs, {});
 
 
-        </table>
-
-    {% endif %}
-
-    <p id="reading"></p>
-
-
-        <script type="text/javascript">
-            let graphs = {{ graphJSON | safe }};
-            Plotly.plot('chart', graphs, {});
-        </script>
-
-
-
-    <script>
-
-        function read() {
-            fetch('/reading')
-                .then(response => {
-                    return response.text();
-                })
-                .then(text => {
-                    document.getElementById('reading').textContent = text;
-                });
-        }
     </script>
-
 
 
 

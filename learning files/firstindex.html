@@ -1,0 +1,58 @@
+<div class="container">
+    <div class="p-5 mb-4 bg-light rounded-3">
+        <div class="container-fluid py-5">
+            <h1 class="display-5 fw-bold">Weather and Transport</h1>
+            <button class="btn btn-primary btn-lg" type="button">Example button</button>
+        </div>
+    </div>
+
+    <div class="container">
+
+
+        <h2>Dashboard</h2>
+        <div class="row">
+            <div id="chart"></div>
+        </div>
+
+    </div>
+    {% if error is defined %}
+        <div class="alert alert-warning">
+            No data for city
+        </div>
+    {% endif %}
+    {% if data is defined %}
+        <h2>Current Area Information</h2>
+        <table>
+            {% for id in definitions %}
+                <tr>
+                    <th>{{ definitions[id]['label'] }}</th>
+                    <td>{{ data[id] }}</td>
+                </tr>
+            {% endfor %}
+
+
+        </table>
+
+    {% endif %}
+
+    <p id="reading"></p>
+
+
+    <script type="text/javascript">
+        let graphs = {{ graphJSON | safe }};
+        Plotly.plot('chart', graphs, {});
+    </script>
+
+</div>
+<script>
+
+    function read() {
+        fetch('/reading')
+            .then(response => {
+                return response.text();
+            })
+            .then(text => {
+                document.getElementById('reading').textContent = text;
+            });
+    }
+</script>

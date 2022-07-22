@@ -1,6 +1,6 @@
 temp,Temperature,ºC,ºF
-temp_min,Min,ºC,ºF
-temp_max,Max,ºC,ºF
+temp_min,Min,ºC,ºF,disabled
+temp_max,Max,ºC,ºF,disabled
 feels_like,Feels Like,ºC,ºF
 humidity,Humidity,%,%
 speed,Wind Speed,km/h,kn
