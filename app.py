@@ -6,24 +6,31 @@ import weather_api
 
 app = Flask(__name__)
 
-definitions = {}
-with open('static/definitions.csv') as f:
+weather_definitions = {}
+with open('static/weather_definitions.csv') as f:
     for line in f:
         if 'disabled' in line:
             continue
         id, label, metric, imperial = line.strip().split(',')
-        definitions[id] = {
+        weather_definitions[id] = {
             'label': label,
             'units': (metric, imperial)
         }
+transport_definitions = {}
+with open('static/transport_definitions.csv') as f:
+    for line in f:
+        line = line.strip().split(',')
+        transport_definitions[line[0]] = line[1]
 
 transport = td.read_data()
 
 sumTransport = td.all_transport_sum(td.xs(transport, line="All - NSW"))
 sumTransport = td.aggregate(sumTransport, 7)
-figJSON = graphing.default_graph(leftFrame=sumTransport, leftCols=[], rightFrame=weather_api.historical_sydney(),
-                                 rightCols=['rain', 'temp'],
-                                 definitions=definitions)
+
+weather = weather_api.historical_sydney()[['rain', 'temp']]
+
+figJSON = graphing.jsonify(graphing.default_graph(leftFrame=sumTransport, rightFrame=weather,
+                                 definitions=weather_definitions))
 
 locations = transport.columns
 subLoc = []
@@ -34,7 +41,7 @@ for mode, loc in locations:
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html', graphJSON=figJSON, definitions=definitions, locations=subLoc)
+    return render_template('index.html', graphJSON=figJSON, definitions=weather_definitions, locations=subLoc)
 
 
 @app.route('/test', methods=['POST'])
@@ -46,14 +53,23 @@ def test():
         return figJSON
     print(form)
 
-    data = td.xs(transport, line=form.get('loc'))
+    # print(data)
 
-    print(data)
+    if form.get("filter-all") == "true":
+        modes = None
+    else:
+        modes = [transport_definitions[x.split('-')[1]] for x in form if x.startswith("filter") and form[x] == "true"]
 
-    return str(data)
 
+    data = td.xs(transport, line=form.get("loc"), modes=modes)
 
+    if form.get("agg") == "aggregated":
+        data = td.all_transport_sum(data)
 
+    data = td.aggregate(data, 7)
+
+    fig = graphing.default_graph(data, weather, weather_definitions)
+    return graphing.jsonify(fig)
 
 
 @app.route('/graphs')

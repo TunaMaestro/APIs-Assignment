@@ -1,6 +1,6 @@
 .filter-icon {
     fill: white;
-    margin: 2px;
+    margin-right: 8px;
 }
 
 #sidebar {
@@ -62,25 +62,26 @@ hr {
 
 .extra-info {
     display: none;
-    line-height: 20px;
-    font-size: 12px;
+    line-height: 14px;
+    font-size: 14px;
     color: black;
 }
 
 .info:hover .extra-info {
     display: inline-block;
+    z-index: 10;
 }
 
 .info {
     font-size: 20px;
-    padding-left: 5px;
+    padding-left: 7.5px;
     width: 20px;
     border-radius: 15px;
 }
 
 .info:hover {
     background-color: white;
-    padding: 0 0 0 5px;
+    padding: 0 0 0 7.5px;
     width: 315px;
     text-align: left !important;
     color: black;

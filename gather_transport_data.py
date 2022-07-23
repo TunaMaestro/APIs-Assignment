@@ -126,11 +126,11 @@ def read_data():
         return data
 
 
-def xs(df, mode=None, line=None):
-    if mode and line:
-        return df.xs((mode, line), axis=1)
-    elif mode:
-        return df[mode]
+def xs(df, modes=None, line=None):
+    if modes and line:
+        return df[modes].xs(line, axis=1, level=1)
+    elif modes:
+        return df[modes]
     else:
         return df.xs(line, axis=1, level=1)
 

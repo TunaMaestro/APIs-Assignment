@@ -8,10 +8,11 @@ import pandas as pd
 import weather_api
 
 
-def default_graph(leftFrame, leftCols, rightFrame, rightCols, definitions):
+def default_graph(leftFrame, rightFrame, definitions):
     """
+    :param leftFrame: pd.Dataframe of left axis
     :param frame: pd.DataFrame
-    :param cols: list, list of columns to graph
+    :param definitions dict of key to english labels
     :return: plotly graph json
     """
 
@@ -91,9 +92,13 @@ def default_graph(leftFrame, leftCols, rightFrame, rightCols, definitions):
     #         anchor="free",
     #         position=0
     #     )
+    if isinstance(leftFrame, pd.DataFrame):
+        traces = [go.Scatter(x=leftFrame.index, y=leftFrame[col], yaxis="y3", name=col) for col in leftFrame.columns]
+    else:
+        traces = [go.Scatter(x=leftFrame.index, y=leftFrame, yaxis="y3", name="Transport")]
 
-    fig.add_trace(
-        go.Scatter(x=leftFrame.index, y=leftFrame, yaxis="y3")
+    fig.add_traces(
+        traces
     )
 
     fig.update_layout(
@@ -106,10 +111,9 @@ def default_graph(leftFrame, leftCols, rightFrame, rightCols, definitions):
     # fig2 = px.line(leftFrame)
     # fig2.show()
 
-    graphJSON = jsonify(fig)
     if __name__ == '__main__':
         fig.show()
-    return graphJSON
+    return fig
 
 
 def jsonify(fig):
@@ -132,7 +136,7 @@ def jsonify(fig):
 
 if __name__ == '__main__':
     definitions = {}
-    with open('static/definitions.csv') as f:
+    with open('static/weather_definitions.csv') as f:
         for line in f:
             id, label, metric, imperial = line.strip().split(',')
             definitions[id] = {
@@ -150,7 +154,7 @@ if __name__ == '__main__':
 
 def doThing():
     definitions = {}
-    with open('static/definitions.csv') as f:
+    with open('static/weather_definitions.csv') as f:
         for line in f:
             id, label, metric, imperial = line.strip().split(',')
             definitions[id] = {
