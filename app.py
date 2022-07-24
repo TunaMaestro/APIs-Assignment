@@ -1,6 +1,5 @@
 from flask import Flask, request, render_template
 
-import gather_transport_data
 import gather_transport_data as td
 import graphing
 import weather_api
@@ -8,7 +7,7 @@ import pandas as pd
 
 app = Flask(__name__)
 
-gather_transport_data.request_files()
+td.request_files()
 
 pd.set_option('display.max_columns', 4)
 weather_definitions = {}
@@ -64,7 +63,7 @@ def about():
 
 @app.route('/tapping')
 def tapping():
-    data = gather_transport_data.process_tap_versus()
+    data = td.process_tap_versus()
     fig = graphing.tap_compare(data)
     tapJSON = graphing.jsonify(fig)
     return render_template("tappings.html", tapJSON=tapJSON, overflow="", title="Tapping Data",
@@ -99,4 +98,4 @@ def update_graphs():
 
 
 if __name__ == '__main__':
-    app.run(port=5001)
+    app.run()

@@ -45,11 +45,13 @@ def request_files(force_new=False):
     else:
         last_update = None
 
-    urls, dates = generate_end_urls(last_update)
+    if force_new:
+        urls, dates = generate_end_urls()
+    else:
+        urls, dates = generate_end_urls(last_update)
     print(dates)
     with open(f'{dataLoc}rawData.txt', 'w') as f:
         f.write(f'Last-Updated: {datetime.date.today().isoformat()}\n')
-        f.write('')
         for i, url in enumerate(urls):
             response = requests.get(url, headers={'Referer': 'https://opendata.transport.nsw.gov.au/'})
             if response.status_code != 200:
@@ -197,6 +199,6 @@ if __name__ == '__main__':
 
     # request_files(force_new=True)
 
-    data = process_tap_versus()
+    request_files(force_new=True)
 
     pass
