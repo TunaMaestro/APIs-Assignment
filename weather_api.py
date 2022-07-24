@@ -13,9 +13,12 @@ pd.options.plotting.backend = "plotly"
 
 dataLoc = "dynamic/weather/"
 
+last_called = ""
+
 def call_api(path, query, endpoint=f'https://api.openweathermap.org'):
     url = f'{endpoint}{path}{query}'
-    print(url)
+    global last_called
+    last_called = url
     return requests.request('get', url).json()
 
 
@@ -32,6 +35,10 @@ def weather_from_coords(lat, lon):
 
 
 def historical_one_year(city, downloadNew=False):
+    cityData = city_data(city)[0]
+    lat = cityData['lat']
+    lon = cityData['lon']
+
     list = []
     with open(f'{dataLoc}staticWeatherFrom2020.json') as f:
         keysToKeep = ['dt', 'main', 'weather', 'clouds', 'wind']
@@ -47,14 +54,14 @@ def historical_one_year(city, downloadNew=False):
         # start = datetime.datetime.now() - datetime.timedelta(days=28)
         while start < datetime.datetime.now() - datetime.timedelta(days=1):
             dt = int(start.timestamp())
-            query = f'?city={city}&units={units}&type=hour&appid={key}&start={dt}&cnt={count}'
+            query = f'?lat={lat}&lon={lon}&units={units}&type=hour&appid={key}&start={dt}&cnt={count}'
             response = call_api(path, query, endpoint="https://history.openweathermap.org")
             list.extend(response['list'])
-            print(start.isoformat())
+            print(f'\r{start.date()} / {datetime.date.today()} response: {response["cod"]} URL={last_called}', end="")
             start += datetime.timedelta(weeks=1)
-        with open('learning files/rawPastYear.txt', 'w') as f:
+        with open('dynamic/weather/rawPastYear.json', 'w') as f:
             json.dump(list, f)
-    with open('learning files/rawPastYear.txt') as f:
+    with open('dynamic/weather/rawPastYear.json') as f:
         list.extend(json.load(f))
     return list
 
@@ -76,7 +83,6 @@ def city_data(city, country='AU'):
 
 
 def process_data(data=None):
-    pd.set_option('display.max_columns', 4)
     if data is None:
         with open('learning files/testData.json') as f:
             data = json.load(f)['list']
@@ -94,18 +100,23 @@ def process_data(data=None):
     final = final.set_index('dt')
 
     aggregatePeriod = 7  # in days
+
     def match_time_period(dt):
         return dt.timestamp() // datetime.timedelta(days=aggregatePeriod).total_seconds()
 
     grouped = final.groupby(by=match_time_period, group_keys=False)
 
-    final = grouped.agg({'temp': np.mean, 'rain': lambda x: np.sum(x)})
+    # final = grouped.agg({'temp': np.mean, 'rain': lambda x: np.sum(x)})
 
-    newIndex = [datetime.datetime.fromtimestamp(x * datetime.timedelta(days=aggregatePeriod).total_seconds()) for x in final.index]
+    final = grouped.agg(np.mean)
+
+    final['rain'] = grouped.agg({'rain': lambda x: np.sum(x)})
+
+    newIndex = [datetime.datetime.fromtimestamp(x * datetime.timedelta(days=aggregatePeriod).total_seconds()) for x in
+                final.index]
     final.index = newIndex
 
     return final
-
 
 
 def historical_sydney():
@@ -119,6 +130,7 @@ def historical_sydney():
 if __name__ == '__main__':
     # weather_from_city('Sydney', weather_from_coords)
     # data = process_data()
-    rawList = historical_one_year('sydney', downloadNew=True)
+    rawList = historical_one_year('sydney', True)
     # data = process_data(rawList)
+
     pass

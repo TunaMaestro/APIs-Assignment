@@ -1,15 +1,23 @@
+:root {
+    --boot-dark: #212529;
+}
+
 .filter-icon {
     fill: white;
     margin-right: 8px;
 }
 
-#sidebar {
-    overflow: hidden;
+.navbar {
+    padding: 20px;
 }
 
-#content {
-    overflow-y: auto;
+
+#sidebar {
+    overflow: hidden;
+    width: 280px;
+    height: 100vh;
 }
+
 
 main {
     display: flex;
@@ -19,30 +27,62 @@ main {
     max-height: 100vh;
     overflow: hidden;
 }
+
+
 .topbar h1 {
     margin: 0;
     padding: 1%;
     text-align: center;
 }
+
 .topbar {
     border-bottom-width: 2px;
     border-bottom-color: #f8f9fa;
     border-bottom-style: solid;
+}
 
+.nav-link {
+    /*color: #c4c4c4;*/
+}
+
+.navbar :not(.active) {
+    opacity: 80%;
 }
 
 
-.main-graph {
-    min-width: 100%;
-    margin: auto;
+.graph {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    flex-grow: 0;
 }
+#box-plots-graph {
+    max-height: 700px;
+    max-width: 60%;
+    margin-bottom: 100px;
+}
+
 
 .content {
     flex-grow: 1;
     flex-shrink: 1;
     flex-basis: 0;
+    overflow-y: scroll;
+    min-height: 100%;
 }
 
+.container {
+    padding-top: 2%;
+    display: flex;
+    flex-direction: column;
+}
+
+.container > * {
+    /*outline-width: 8px;*/
+    /*outline-style: dashed;*/
+    /*outline-color: red;*/
+
+}
 
 .sidebar {
     position: relative;
@@ -60,6 +100,61 @@ hr {
     opacity: 70%;
 }
 
+.about-row {
+    margin-bottom: 2rem;
+}
+
+.about-img-item {
+    width: 50%;
+}
+
+.about-img-item img, .about-img-item iframe {
+    width: 100%;
+    outline-color: var(--boot-dark);
+    outline-width: 2px;
+    outline-style: solid;
+}
+
+.about-img-item iframe {
+    height: 400px;
+}
+
+.about-caption-row {
+    margin-bottom: 1%;
+}
+
+.about-caption-row>div {
+    width: 100%;
+}
+
+.code {
+    font-family: monospace;
+    background: #343434;
+    color: #ffffff;
+    border-radius: 4px;
+    padding: 2px 4px 2px 4px;
+    /*border-style: solid;*/
+    /*border-width: 1px;*/
+    /*border-color: grey;*/
+}
+q {
+    quotes: "\201C" "\201D" "\2018" "\2019";
+}
+
+.flow-arrow {
+    max-height: 150px;
+}
+.arrows-row {
+    justify-content: space-around;
+    margin-bottom: 2%;
+}
+#plotly-logo {
+    outline-offset: 10px;
+}
+#home-button {
+    margin-top: 100px;
+    margin-bottom: 100px;
+}
 .extra-info {
     display: none;
     line-height: 14px;

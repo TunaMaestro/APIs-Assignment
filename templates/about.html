@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+
+        <p></p>
+
+        <div class="d-flex justify-content-center about-row">
+            <div class="about-img-item">
+                <img src="/static/images/OpenDataHomepage.png" title="OpenData Homepage">
+            </div>
+            <div class="about-img-item">
+                <img src="/static/images/OpenWeatherHomepage.png" title="OpenWeather Homepage">
+            </div>
+        </div>
+
+        <div class="d-flex about-caption-row">
+            <div>
+                <p>The transport data comes from OpenData, who host all Transport for NSW data.
+                    OpenData has both APIs and datasets, but this project downloads a dynamic dataset that gets updated
+                    daily.</p>
+            </div>
+            <div>
+                <p>The weather data comes from OpenWeather, the service we used in class.
+                    The historical data API used to query the temperature, rainfall, humidity, and other aspects of
+                    weather data that are available in the forecast, for the past.</p>
+            </div>
+        </div>
+
+        <div class="d-flex arrows-row">
+            <img class="flow-arrow" src="/static/images/arrow.svg">
+            <img class="flow-arrow" src="/static/images/arrow.svg">
+        </div>
+
+        <div class="d-flex justify-content-center about-row">
+            <div class="about-img-item">
+                <img src="/static/images/OpenDataBrowser.png" title="OpenData Opal Patronage File Browser">
+            </div>
+            <div class="about-img-item">
+                <img src="/static/images/OpenWeatherAPIDocs.png" title="OpenWeather History API Docs">
+            </div>
+        </div>
+
+        <div class="d-flex about-caption-row">
+            <div>
+                <p>The Opal Patronage dataset is not provided in a machine friendly format, OpenData provides a browser
+                    that allows a human to navigate directories of year-month and day, to access specific text files.
+                    Behind the scenes, each file is hosted on an Amazon Web Services server. The browser queries the
+                    server for the contents of each directory, which gives an XML response of the contents of each
+                    directory. Instead of using this and accessing the data by recursively through the files of
+                    each directory, all the endpoint URLs are generated based on their format of <span class="code">Opal_Patronage_<span
+                            style="color: darkorange">{yyyymmdd}</span>.txt</span>, then queried one-by-one
+                    and combined into a single file.
+                </p>
+            </div>
+            <div>
+                <p>The OpenWeather API is fantastic in its usability, as a fully-fledged API. The request is made over
+                    an HTTP <span class="code">GET</span> request where the parameters are set in the URL query.
+                    According to the API docs, <q cite="https://openweathermap.org/history">The maximum historical data
+                        depth in one API response is one week</q>, so once again, each week is looped through and
+                    combined into a single object.
+                </p>
+            </div>
+        </div>
+
+        <div class="d-flex arrows-row">
+            <img class="flow-arrow" src="/static/images/arrow.svg">
+            <img class="flow-arrow" src="/static/images/arrow.svg">
+        </div>
+
+        <div class="d-flex justify-content-center about-row">
+            <div class="about-img-item">
+                <iframe src="./static/exampleTransportData.txt" title="OpenData Opal Patronage File Browser"></iframe>
+            </div>
+            <div class="about-img-item">
+                <iframe src="./static/exampleResponseText.txt" title="OpenData Opal Patronage File Browser"></iframe>
+            </div>
+        </div>
+
+        <div class="d-flex about-caption-row">
+            <div>
+                <p>
+                    The raw opal data exists in this pipe delimited format, where there rows for every transport mode,
+                    line, and hour of each day. This totals to over 600 lines per day, which makes the final file
+                    massive, at over 600,000 lines long, most of which is repeated information, like each date.
+                    After processing, the data will have been reduced from 25 megabytes to 8.
+                    <br>
+                    For privacy, the dataset is
+                    sanitised of personal information, so numbers are rounded to the nearest 100, and if there are less
+                    than 50 taps for a row, it is left as <span class="code"><50</span>. This is grounds for some
+                    inaccuracy, only affects smaller lines at lull times.
+                    The numbers aggregate all forms of taps, so visa or phone taps are combined with opal taps.
+                </p>
+            </div>
+            <div>
+                <p>The weather API response is a JSON string, with all the pertinent information stored in the <span
+                        class="code">list</span> array, which contains the 168 (hours in a week) data points for that
+                    call. Due to the format of this response, much less work has to be done on it to make it usable.</p>
+            </div>
+        </div>
+
+        <div class="d-flex arrows-row">
+            <img class="flow-arrow" style="transform: rotate(-20deg);" src="/static/images/arrow.svg">
+            <img class="flow-arrow" style="transform: rotate(20deg);" src="/static/images/arrow.svg">
+        </div>
+
+        <div class="d-flex justify-content-center about-row">
+            <div class="about-img-item">
+                <img src="https://raw.githubusercontent.com/pandas-dev/pandas/main/web/pandas/static/img/pandas.svg">
+            </div>
+        </div>
+        <div class="d-flex arrows-row justify-content-center">
+            <img class="flow-arrow" src="/static/images/arrow.svg">
+        </div>
+        <div class="d-flex justify-content-center about-row">
+            <div class="about-img-item">
+                <img id="plotly-logo" src="/static/images/plotlylogo.png">
+            </div>
+        </div>
+        <div class="d-flex">
+            <p>For the massive amounts of data having to be processed in this project, I opted to use pandas, a data
+                manipulation library to store and control all my data. Both data collections of data are condensed into
+                <span class="code">pandas.DataFrame</span> objects, which are <q>two-dimensional, size-mutable,
+                    potentially heterogeneous tabular data.</q> with labeled rows and columns.
+                <br>
+                Both dataframes are indexed by hour with <span class="code">datetime.datetime</span> objects as the
+                datetime library allows for easier and more robust time manipulation than strings. The index is the
+                'y-axis' of
+                the dataframe, which points to each row. The datetime index makes up the x axes of each of the graphs,
+                and is the common ground between the data sources.<br><br>
+                Even though both sources of data have hourly granularity, the data is instead presented by week. Data
+                points like taps and temperature are both cyclical on a daily period, so the hourly graph looks filled
+                in due to the quantity of data. To make the data useful, it has to be diluted to a single point per
+                week. I do this with the <span class="code">DataFrame.groupby()</span> method and an array of each
+                data point's 'week' &mdash; its integer number of weeks since the epoch.
+                <br><br>
+                Eventually, through the user's filtering, the required arrays and dataframes are passed to plotly to
+                produce a graph.
+            </p>
+        </div>
+        <div id="home-button" class="d-flex justify-content-center">
+            <a class="btn btn-outline-dark btn-lg" href="/">Return to Home</a>
+        </div>
+    </div>
+{% endblock %}

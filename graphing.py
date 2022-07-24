@@ -6,6 +6,7 @@ from plotly.subplots import make_subplots
 import gather_transport_data
 import pandas as pd
 import weather_api
+import calendar
 
 
 def default_graph(leftFrame, rightFrame, definitions):
@@ -52,46 +53,18 @@ def default_graph(leftFrame, rightFrame, definitions):
             "title_standoff": 40
         },
         paper_bgcolor="rgba(0,0,0,0)"
-    )
-    )
+    ))
 
     # https://maegul.gitbooks.io/resguides-plotly/content/content/plotting_locally_and_offline/python/multiple_axes_and_subplots.html
 
     fig.update_layout(
-        title_text="Double Y Axis Example"
+        title_text="Selected transport versus weather"
     )
     fig.update_layout(
         xaxis=dict(title_text="Date",
                    domain=[0.05, 0.85])
     )
-    #     yaxis=dict(
-    #         title="Temperature",
-    #         range=[0, 30],
-    #         side="right",
-    #         # position=0.1,
-    #         # anchor="free"
-    #     ),
-    #     yaxis2=dict(
-    #         title="y2",
-    #         range=[0, 150],
-    #         side="right",
-    #         overlaying="y",
-    #     )
-    # )
 
-    #     yaxis=dict(
-    #         title="yaxis1 title",
-    #         side="right",
-    #         overlaying="y1",
-    #         # anchor="free"
-    #     ),
-    #     yaxis2=dict(
-    #         title="yaxis2 title",
-    #         side="right",
-    #         overlaying="y2",
-    #         anchor="free",
-    #         position=0
-    #     )
     if isinstance(leftFrame, pd.DataFrame):
         traces = [go.Scatter(x=leftFrame.index, y=leftFrame[col], yaxis="y3", name=col) for col in leftFrame.columns]
     else:
@@ -103,7 +76,7 @@ def default_graph(leftFrame, rightFrame, definitions):
 
     fig.update_layout(
         yaxis3=dict(
-            title="Tranposrt Sum",
+            title="Transport — Tap Ons",
             side="left",
             overlaying="y"
         )
@@ -113,6 +86,41 @@ def default_graph(leftFrame, rightFrame, definitions):
 
     if __name__ == '__main__':
         fig.show()
+    return fig
+
+
+def box_plot_sliders(series):
+    # months = series.index.map(lambda x: x.month).to_series()
+    months = pd.Series((calendar.month_name[x.month] for x in series.index), index=series.index)
+    df = pd.concat((series, months), axis=1)
+    df.columns = ['t', 'm']
+
+    fig = px.box(df, y='t', animation_frame='m',
+                 labels={
+                     'm': "Month",
+                     't': "Taps"
+                 },
+                 title="Taps distribution for each month (Always aggregated)"
+                 )
+
+    # fig.show()
+    fig.update_layout(dict(
+        yaxis1={
+            "title_standoff": 40
+        },
+        paper_bgcolor="rgba(0,0,0,0)"
+    ))
+
+    return fig
+
+
+def tap_compare(df):
+    fig = px.area(df, labels={
+        "value": "Taps",
+        "index": "Date",
+        "variable": "Type"
+    })
+    fig.update_layout(title="Tapping data from all transport modes and lines")
     return fig
 
 

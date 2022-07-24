@@ -1,11 +1,16 @@
 from flask import Flask, request, render_template
 
+import gather_transport_data
 import gather_transport_data as td
 import graphing
 import weather_api
+import pandas as pd
 
 app = Flask(__name__)
 
+gather_transport_data.request_files()
+
+pd.set_option('display.max_columns', 4)
 weather_definitions = {}
 with open('static/weather_definitions.csv') as f:
     for line in f:
@@ -25,14 +30,17 @@ with open('static/transport_definitions.csv') as f:
 transport = td.read_data()
 
 sumTransport = td.all_transport_sum(td.xs(transport, line="All - NSW"))
-sumTransport = td.aggregate(sumTransport, 7)
 
-weather = weather_api.historical_sydney()[['rain', 'temp']]
+weather = weather_api.historical_sydney()
 
-figJSON = graphing.jsonify(graphing.default_graph(leftFrame=sumTransport, rightFrame=weather,
-                                 definitions=weather_definitions))
+figJSON = graphing.jsonify(
+    graphing.default_graph(leftFrame=td.aggregate(sumTransport, 7), rightFrame=weather[['rain', 'temp']],
+                           definitions=weather_definitions))
 
 locations = transport.columns
+
+boxPlots = graphing.box_plot_sliders(td.aggregate(sumTransport, 1))
+boxJSON = graphing.jsonify(boxPlots)
 subLoc = []
 for mode, loc in locations:
     if loc not in subLoc:
@@ -41,27 +49,45 @@ for mode, loc in locations:
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html', graphJSON=figJSON, definitions=weather_definitions, locations=subLoc)
+    return render_template('index.html', graphJSON=figJSON, secondGraph=boxJSON, definitions=weather_definitions,
+                           locations=subLoc,
+                           overflow="overflow-hidden",
+                           title="Weather and Transport",
+                           header="Weather and Transport",
+                           page="index")
 
 
-@app.route('/test', methods=['POST'])
-def test():
-    print('test reception')
+@app.route('/about')
+def about():
+    return render_template("about.html", overflow="", title="About the Data", header="About the Data", page="about")
+
+
+@app.route('/tapping')
+def tapping():
+    data = gather_transport_data.process_tap_versus()
+    fig = graphing.tap_compare(data)
+    tapJSON = graphing.jsonify(fig)
+    return render_template("tappings.html", tapJSON=tapJSON, overflow="", title="Tapping Data",
+                           header="Tap On and Off Comparison",
+                           page="tapping")
+
+
+@app.route('/update_graphs', methods=['POST'])
+def update_graphs():
+    # TODO make this work for weather
     form = dict(request.form)
-    if form.get('df') == "false":
-        # graphing.default_graph()
-        return figJSON
-    print(form)
 
-    # print(data)
+    print(form)
 
     if form.get("filter-all") == "true":
         modes = None
     else:
         modes = [transport_definitions[x.split('-')[1]] for x in form if x.startswith("filter") and form[x] == "true"]
 
-
     data = td.xs(transport, line=form.get("loc"), modes=modes)
+    print('Selected modes:', modes)
+    boxPlot = graphing.box_plot_sliders(td.aggregate(td.all_transport_sum(data), 1))
+    boxJSON = graphing.jsonify(boxPlot)
 
     if form.get("agg") == "aggregated":
         data = td.all_transport_sum(data)
@@ -69,22 +95,8 @@ def test():
     data = td.aggregate(data, 7)
 
     fig = graphing.default_graph(data, weather, weather_definitions)
-    return graphing.jsonify(fig)
-
-
-@app.route('/graphs')
-def graphs():
-    data = weather_api.process_data()
-
-    data.to_csv('testLogOutput.csv')
-
-    graph = graphing.default_graph(data, 'speed')
-    return render_template('graphs.html', graph=graph)
-
-
-# @app.route('/reading')
-# def reading():
-#     return str(datetime.datetime.now().microsecond)
+    figJSON = graphing.jsonify(fig)
+    return f'[{figJSON}, {boxJSON}]'
 
 
 if __name__ == '__main__':

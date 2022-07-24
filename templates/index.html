@@ -1,14 +1,15 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="topbar bg-dark text-white">
-        <h1>Weather and Transport</h1>
 
-    </div>
+    <head>
+        <script src="{{ url_for('static', filename='filter.js') }}"></script>
+    </head>
+
+
     <main>
         <!-- Sidebar, from https://getbootstrap.com/docs/5.0/examples/sidebars/# -->
-        <div id="sidebar" class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white bg-dark"
-             style="width: 280px; height: 100%;">
+        <div id="sidebar" class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white bg-dark">
             <form id="filter">
                 <a href="/" id="filter-submit"
                    class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
@@ -83,30 +84,41 @@
                 </div>
 
                 <hr class="thick-hr">
-                <h5 class="fs-5">Weather</h5>
-                {% for weatherAspect in definitions %}
-                    <label>{{ definitions[weatherAspect]['label'] }}
-                        <input name="{{ weatherAspect }}" type="checkbox">
-                    </label>
-                {% endfor %}
+{#                <h5 class="fs-5">Extra Weather</h5>#}
+{#                {% for weatherAspect in definitions %}#}
+{#                    <label style="display: block;">#}
+{#                        <input name="{{ weatherAspect }}" type="checkbox">#}
+{#                        {{ definitions[weatherAspect]['label'] }}#}
+{#                    </label>#}
+{#                {% endfor %}#}
+
             </form>
         </div>
 
         <div id="content" class="content d-flex flex-column flex-shrink-0 p-3 bg-light">
 
-            <div class="main-graph bg-light" id="main-graph"></div>
+            <div class="graph bg-light" id="main-graph"></div>
 
-            <div id="chart"></div>
+            <div>
+                <p class="d-inline">Note: Only tap ons are used as they are a more reliable and consistent measurement.
+                    When filtering for <span class="code">All - NSW</span> the difference is negligible, see:</p>
+                <a href="/tapping" class="btn btn-secondary d-inline-block">Tapping Habits</a>
+            </div>
 
-            <p id="df">wwehwewew</p>
+            <div class="graph bg-light" id="box-plots-graph">
+            </div>
+
+
         </div>
     </main>
 
     <script type="text/javascript">
         let graphs = {{ graphJSON | safe }};
         Plotly.plot('main-graph', graphs, {});
-
-
+    </script>
+    <script type="text/javascript">
+        let secondGraph = {{ secondGraph | safe }};
+        Plotly.plot('box-plots-graph', secondGraph, {});
     </script>
 
 
