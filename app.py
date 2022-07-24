@@ -74,7 +74,6 @@ def tapping():
 
 @app.route('/update_graphs', methods=['POST'])
 def update_graphs():
-    # TODO make this work for weather
     form = dict(request.form)
 
     print(form)
