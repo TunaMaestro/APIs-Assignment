@@ -39,7 +39,7 @@ def request_files(force_new=False):
         last_update = first_line.split()[1]
         last_update = datetime.date.fromisoformat(last_update)
         if datetime.date.today() - last_update < datetime.timedelta(days=1):
-            print("File up to date!")
+            print("Transport data files up to date!")
             if not force_new:
                 return True
     else:
